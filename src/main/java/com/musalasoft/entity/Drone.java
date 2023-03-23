@@ -21,17 +21,17 @@ public class Drone {
     @Id
     private String serialNumber;
     private Model model;
-    private float weight;
+    private float weightLimit;
     private float batteryCapacity;
     private State state;
 
     @OneToMany(targetEntity = Medication.class)
     private List<Medication> medications;
 
-    public Drone(String serialNumber, Model model, float weight, float batteryCapacity, State state) {
+    public Drone(String serialNumber, Model model, float weightLimit, float batteryCapacity, State state) {
         this.serialNumber = serialNumber;
         this.model = model;
-        this.weight = weight;
+        this.weightLimit = weightLimit;
         this.batteryCapacity = batteryCapacity;
         this.state = state;
     }

@@ -1,12 +1,19 @@
 package com.musalasoft.web;
 
 import com.musalasoft.entity.Drone;
+import com.musalasoft.entity.Medication;
+import com.musalasoft.exception.DroneApiException;
 import com.musalasoft.model.DroneRegistration;
+import com.musalasoft.model.Error;
+import com.musalasoft.model.MedicationLoader;
 import com.musalasoft.service.DroneService;
+import com.musalasoft.util.JsonConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,11 +33,43 @@ public class DroneController {
         droneService.registerDrone(droneRegistration);
     }
 
-    @PutMapping(value = "{serialNumber}/load")
-    @ResponseStatus(HttpStatus.CREATED)
-    public void loadDrone(@RequestBody List<String> medicationCodes, @PathVariable String serialNumber) {
+    @PutMapping(value = "{serialNumber}/load", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<String> loadDrone(@RequestBody MedicationLoader medicationLoader, @PathVariable String serialNumber) {
         LOGGER.info("Request received to load the drone. [{}]", serialNumber);
-        droneService.loadDrone(serialNumber, medicationCodes);
+        try {
+            Drone loadedDrone = droneService.loadDrone(serialNumber, medicationLoader);
+            return new ResponseEntity<>(JsonConverter.toJson(loadedDrone), HttpStatus.OK);
+        } catch (DroneApiException e) {
+            Error error = new Error(e.getMessage(), e.getError().value());
+            return new ResponseEntity<>(JsonConverter.toJson(error), e.getError());
+        }
+    }
+
+    @GetMapping(value = "/{serialNumber}/medications", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<String> getLoadedMedications(@PathVariable String serialNumber) {
+        LOGGER.info("Request received to get the loaded medications for the drone. [{}]", serialNumber);
+        try {
+            List<Medication> medicationList = droneService.getMedications(serialNumber);
+            return new ResponseEntity<>(JsonConverter.toJson(medicationList), HttpStatus.OK);
+        } catch (DroneApiException e) {
+            Error error = new Error(e.getMessage(), e.getError().value());
+            return new ResponseEntity<>(JsonConverter.toJson(error), e.getError());
+        }
+    }
+
+    @GetMapping(value = "/availableForLoading", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<String> fetchAvailableDronesForLoading() {
+        LOGGER.info("Request received to fetch available drones for loading");
+        try {
+            List<Drone> droneList = droneService.getDronesAvailForLoading();
+            return new ResponseEntity<>(JsonConverter.toJson(droneList), HttpStatus.OK);
+        } catch (DroneApiException e) {
+            Error error = new Error(e.getMessage(), e.getError().value());
+            return new ResponseEntity<>(JsonConverter.toJson(error), e.getError());
+        }
     }
 
     @GetMapping(value = "")
