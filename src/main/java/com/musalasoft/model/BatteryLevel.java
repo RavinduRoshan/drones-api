@@ -11,10 +11,12 @@ import java.io.Serializable;
 @ToString
 @Setter
 @Getter
-public class DroneRegistration implements Serializable {
+public class BatteryLevel implements Serializable {
     private String serialNumber;
-    private Model model;
-    private float weightLimit;
     private float batteryCapacity;
-    private State state;
+
+    public BatteryLevel(String serialNumber, float batteryCapacity) {
+        this.serialNumber = serialNumber;
+        this.batteryCapacity = batteryCapacity;
+    }
 }

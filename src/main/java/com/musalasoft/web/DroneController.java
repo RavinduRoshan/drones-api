@@ -3,6 +3,7 @@ package com.musalasoft.web;
 import com.musalasoft.entity.Drone;
 import com.musalasoft.entity.Medication;
 import com.musalasoft.exception.DroneApiException;
+import com.musalasoft.model.BatteryLevel;
 import com.musalasoft.model.DroneRegistration;
 import com.musalasoft.model.Error;
 import com.musalasoft.model.MedicationLoader;
@@ -66,6 +67,19 @@ public class DroneController {
         try {
             List<Drone> droneList = droneService.getDronesAvailForLoading();
             return new ResponseEntity<>(JsonConverter.toJson(droneList), HttpStatus.OK);
+        } catch (DroneApiException e) {
+            Error error = new Error(e.getMessage(), e.getError().value());
+            return new ResponseEntity<>(JsonConverter.toJson(error), e.getError());
+        }
+    }
+
+    @GetMapping(value = "/{serialNumber}/checkBattery", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<String> checkBattery(@PathVariable String serialNumber) {
+        LOGGER.info("Request received to check the battery capacity of the drone. [{}]", serialNumber);
+        try {
+            BatteryLevel batteryLevel = droneService.getBatteryLevel(serialNumber);
+            return new ResponseEntity<>(JsonConverter.toJson(batteryLevel), HttpStatus.OK);
         } catch (DroneApiException e) {
             Error error = new Error(e.getMessage(), e.getError().value());
             return new ResponseEntity<>(JsonConverter.toJson(error), e.getError());
