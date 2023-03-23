@@ -12,7 +12,7 @@ import lombok.ToString;
 public class DroneRegistration {
     private String serialNumber;
     private Model model;
-    private float weight;
+    private float weightLimit;
     private float batteryCapacity;
     private State state;
 }
