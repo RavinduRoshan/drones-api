@@ -10,6 +10,7 @@ import lombok.ToString;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import java.io.Serializable;
 import java.util.List;
 
 @EqualsAndHashCode
@@ -17,7 +18,7 @@ import java.util.List;
 @Setter
 @Getter
 @Entity
-public class Drone {
+public class Drone implements Serializable {
     @Id
     private String serialNumber;
     private Model model;
