@@ -3,6 +3,7 @@ package com.musalasoft.service.impl;
 import com.musalasoft.entity.Drone;
 import com.musalasoft.entity.Medication;
 import com.musalasoft.exception.DroneApiException;
+import com.musalasoft.model.BatteryLevel;
 import com.musalasoft.model.DroneRegistration;
 import com.musalasoft.model.MedicationLoader;
 import com.musalasoft.model.State;
@@ -65,6 +66,14 @@ public class DroneServiceImpl implements DroneService {
             }
         }
         return droneList;
+    }
+
+    @Override
+    public BatteryLevel getBatteryLevel(String serialNumber) throws DroneApiException {
+        LOGGER.info("Ready to fetch the battery capacity of the drone [{}]", serialNumber);
+        Drone drone = droneRepository.findDroneBySerialNumber(serialNumber);
+        validateDrone(drone);
+        return new BatteryLevel(drone.getSerialNumber(), drone.getBatteryCapacity());
     }
 
     private Drone loadDroneWithMedications(MedicationLoader medicationLoader, Drone drone) {

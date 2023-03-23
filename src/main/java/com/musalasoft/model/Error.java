@@ -5,11 +5,13 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.io.Serializable;
+
 @EqualsAndHashCode
 @ToString
 @Setter
 @Getter
-public class Error {
+public class Error implements Serializable {
     private String message;
     private int code;
 
