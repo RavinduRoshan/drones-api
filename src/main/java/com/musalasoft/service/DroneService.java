@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface DroneService {
 
-    void registerDrone(DroneRegistration droneRegistration);
+    Drone registerDrone(DroneRegistration droneRegistration);
 
     Drone loadDrone(String serialNumber, MedicationLoader medicationLoader) throws DroneApiException;
 
