@@ -18,6 +18,11 @@ public class MedicationServiceImpl implements MedicationService {
     private MedicationRepository medicationRepository;
 
     @Override
+    public List<Medication> saveAll(List<Medication> medications) {
+        return medicationRepository.saveAll(medications);
+    }
+
+    @Override
     public List<Medication> getAllMedications() {
         return medicationRepository.findAll();
     }

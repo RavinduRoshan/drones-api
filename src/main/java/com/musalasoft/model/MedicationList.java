@@ -1,5 +1,6 @@
 package com.musalasoft.model;
 
+import com.musalasoft.entity.Medication;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,6 +13,6 @@ import java.util.List;
 @ToString
 @Setter
 @Getter
-public class MedicationLoader implements Serializable {
-    private List<String> medicationCodes;
+public class MedicationList implements Serializable {
+    private List<Medication> medications;
 }

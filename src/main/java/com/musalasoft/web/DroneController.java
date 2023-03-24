@@ -6,7 +6,7 @@ import com.musalasoft.exception.DroneApiException;
 import com.musalasoft.model.BatteryLevel;
 import com.musalasoft.model.DroneRegistration;
 import com.musalasoft.model.Error;
-import com.musalasoft.model.MedicationLoader;
+import com.musalasoft.model.MedicationList;
 import com.musalasoft.service.DroneService;
 import com.musalasoft.util.JsonConverter;
 import org.slf4j.Logger;
@@ -43,10 +43,10 @@ public class DroneController {
 
     @PutMapping(value = "{serialNumber}/load", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<String> loadDrone(@RequestBody MedicationLoader medicationLoader, @PathVariable String serialNumber) {
+    public ResponseEntity<String> loadDrone(@RequestBody MedicationList medicationList, @PathVariable String serialNumber) {
         LOGGER.info("Request received to load the drone. [{}]", serialNumber);
         try {
-            Drone loadedDrone = droneService.loadDrone(serialNumber, medicationLoader);
+            Drone loadedDrone = droneService.loadDrone(serialNumber, medicationList);
             return new ResponseEntity<>(JsonConverter.toJson(loadedDrone), HttpStatus.OK);
         } catch (DroneApiException e) {
             Error error = new Error(e.getMessage(), e.getError().value());
