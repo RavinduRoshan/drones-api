@@ -5,7 +5,7 @@ import com.musalasoft.entity.Medication;
 import com.musalasoft.exception.DroneApiException;
 import com.musalasoft.model.BatteryLevel;
 import com.musalasoft.model.DroneRegistration;
-import com.musalasoft.model.MedicationLoader;
+import com.musalasoft.model.MedicationList;
 import com.musalasoft.model.State;
 import com.musalasoft.repository.DroneRepository;
 import com.musalasoft.service.DroneService;
@@ -40,13 +40,15 @@ public class DroneServiceImpl implements DroneService {
     }
 
     @Override
-    public Drone loadDrone(String serialNumber, MedicationLoader medicationLoader) throws DroneApiException {
-        LOGGER.info("Ready to load the drone [{}] with medications [{}]", serialNumber, medicationLoader.getMedicationCodes());
+    public Drone loadDrone(String serialNumber, MedicationList medicationList) throws DroneApiException {
+        LOGGER.info("Ready to load the drone [{}] with medications [{}]", serialNumber, medicationList.getMedications());
         Drone drone = droneRepository.findDroneBySerialNumber(serialNumber);
         validateDrone(drone);
         validateBatteryCapacity(drone);
+        validateMedications(medicationList);
+        List<Medication> savedMedications = persistMedications(medicationList);
         drone = persistLoadingState(drone);
-        return loadDroneWithMedications(medicationLoader, drone);
+        return loadDroneWithMedications(savedMedications, drone);
     }
 
     @Override
@@ -78,21 +80,14 @@ public class DroneServiceImpl implements DroneService {
         return new BatteryLevel(drone.getSerialNumber(), drone.getBatteryCapacity());
     }
 
-    private Drone loadDroneWithMedications(MedicationLoader medicationLoader, Drone drone) {
+    private Drone loadDroneWithMedications(List<Medication> medicationList, Drone drone) {
         List<String> loadedMedications = drone.getMedications().stream().map(Medication::getCode).collect(Collectors.toList());
         float availWeightCapacity = getAvailableWeightCapacity(drone);
-        for (String code : medicationLoader.getMedicationCodes()) {
-            Medication medication = medicationService.findByCode(code);
-            if (medication != null && !loadedMedications.contains(code)) {
-                if (availWeightCapacity >= medication.getWeight()) {
-                    drone.getMedications().add(medication);
-                    availWeightCapacity -= medication.getWeight();
-                } else {
-                    LOGGER.error("Ignore loading medication [{}] due to exceeding drone weight limit..", medication.getCode());
-                }
-            } else {
-                LOGGER.error("Invalid medication to load the drone [{}]", drone.getSerialNumber());
-            }
+        for (Medication medication : medicationList) {
+            checkAlreadyLoaded(loadedMedications, medication);
+            checkAvailableWeight(availWeightCapacity, medication);
+            drone.getMedications().add(medication);
+            availWeightCapacity -= medication.getWeight();
         }
         drone.setState(State.LOADED);
         return droneRepository.save(drone);
@@ -127,6 +122,40 @@ public class DroneServiceImpl implements DroneService {
             LOGGER.error("Drone is already available. drone: [{}]", serialNumber);
             throw new DroneApiException(HttpStatus.BAD_REQUEST, "Drone is already available..");
         }
+    }
+
+    private void checkMedicationExistence(String code) {
+        if (medicationService.findByCode(code) != null) {
+            LOGGER.error("Medication is already available. code: [{}]", code);
+            throw new DroneApiException(HttpStatus.BAD_REQUEST, "Medication is already available. code: " + code);
+        }
+    }
+
+    private void checkAlreadyLoaded(List<String> loadedMedications, Medication medication) {
+        String code = medication.getCode();
+        if (loadedMedications.contains(code)) {
+            LOGGER.error("Medication is already loaded to the drone. code: [{}]", code);
+            throw new DroneApiException(HttpStatus.BAD_REQUEST, "Medication is already loaded to the drone. code: " + code);
+        }
+    }
+
+    private void checkAvailableWeight(float availWeightCapacity, Medication medication) {
+        if (availWeightCapacity < medication.getWeight()) {
+            LOGGER.error("Ignore loading medication [{}] due to exceeding drone weight limit.", medication.getCode());
+            throw new DroneApiException(HttpStatus.BAD_REQUEST, "Ignore loading due to exceeding drone weight limit.. code: " + medication.getCode());
+        }
+    }
+
+    private void validateMedications(MedicationList medicationList) {
+        LOGGER.info("Validating the medications info..");
+        for (Medication medication: medicationList.getMedications()) {
+            ValidationUtil.validateMedication(medication);
+            checkMedicationExistence(medication.getCode());
+        }
+    }
+
+    private List<Medication> persistMedications(MedicationList medicationList) {
+        return medicationService.saveAll(medicationList.getMedications());
     }
 
     private void validateBatteryCapacity(Drone drone) {

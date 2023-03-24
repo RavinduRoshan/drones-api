@@ -1,7 +1,9 @@
 package com.musalasoft.util;
 
+import com.musalasoft.entity.Medication;
 import com.musalasoft.exception.DroneApiException;
 import com.musalasoft.model.DroneRegistration;
+import com.musalasoft.model.MedicationList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -9,10 +11,45 @@ import org.springframework.http.HttpStatus;
 public class ValidationUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(ValidationUtil.class);
     public static void validateDrone(DroneRegistration droneRegistration) {
+        LOGGER.info("Validating the drone info..");
         validateEmptySerialNumber(droneRegistration);
         validateSerialNumberLength(droneRegistration);
         validateWeight(droneRegistration);
         validateBattery(droneRegistration);
+    }
+
+    public static void validateMedication(Medication medication) {
+        LOGGER.info("Validating the medication info..");
+        validateMedicationName(medication);
+        validateMedicationCode(medication);
+        validateImage(medication);
+    }
+
+    private static void validateMedicationName(Medication medication) {
+        String name = medication.getName();
+        String regex = "^[a-zA-Z0-9_-]+$";
+        if (name == null || !name.matches(regex)) {
+            LOGGER.error("Invalid medication name is provided.");
+            throw new DroneApiException(HttpStatus.BAD_REQUEST, "Medication name is invalid. name can contains only letters, numbers, '-' and '_'");
+        }
+    }
+
+    private static void validateMedicationCode(Medication medication) {
+        String code = medication.getCode();
+        String regex = "^[A-Z_\\d]+$";
+        if (code == null || !code.matches(regex)) {
+            LOGGER.error("Invalid medication code is provided.");
+            throw new DroneApiException(HttpStatus.BAD_REQUEST, "Medication code is invalid. code can contains only uppercase letters, numbers, and '_'");
+        }
+    }
+
+    private static void validateImage(Medication medication) {
+        String image = medication.getImage();
+        String regex = "^(.*[\\\\/])?([\\w\\d-]+\\.(jpg|jpeg|png|gif))$";
+        if (image == null || !image.matches(regex)) {
+            LOGGER.error("Invalid medication image is provided.");
+            throw new DroneApiException(HttpStatus.BAD_REQUEST, "Medication image path is invalid. Image should be a file path");
+        }
     }
 
     private static void validateEmptySerialNumber(DroneRegistration droneRegistration) {
