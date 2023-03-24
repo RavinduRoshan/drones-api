@@ -17,7 +17,7 @@ This is a RESTful API for managing drones and their related services.
 This API provides the following endpoints:
 
 #### Register a drone
-Endpoint: *POST /drone/register*
+Endpoint: *POST /api/drone/register*
 
 This endpoint is used to register a new drone.
 
@@ -33,7 +33,7 @@ This endpoint is used to register a new drone.
 ```
 
 #### Load medications to a drone
-Endpoint: PUT /drone/{serialNumber}/load
+Endpoint: PUT /api/drone/{serialNumber}/load
 
 This endpoint is used to load medications to a drone.
 
@@ -57,28 +57,33 @@ This endpoint is used to load medications to a drone.
 }
 ```
 #### Get loaded medications of a drone
-Endpoint: *GET /drone/{serialNumber}/medications*
+Endpoint: *GET /api/drone/{serialNumber}/medications*
 
 This endpoint is used to fetch the medications loaded in a drone.
 
 #### Get available drones for loading
-Endpoint: *GET /drone/availableForLoading*
+Endpoint: *GET /api/drone/availableForLoading*
 
 This endpoint is used to fetch the available drones that can be loaded.
 
 #### Check battery level of a drone
-Endpoint: *GET /drone/{serialNumber}/checkBattery*
+Endpoint: *GET /api/drone/{serialNumber}/checkBattery*
 
 This endpoint is used to check the battery level of a drone.
 
 #### Fetch all registered drones
-Endpoint: *GET /drone*
+Endpoint: *GET /api/drone*
 
 This endpoint is used to fetch all the registered drones.
 
 
 ## Response format
 The API returns JSON response for all endpoints. Successful responses have a 200 status code. In case of errors, appropriate HTTP status codes and error messages are returned.
+
+## Schedule Tasks
+Once you start this application, the drone battery level audit task will be started, and it will be executed periodically 30 sec
+
+- The audit logs will be stored in the *DRONE_BATTERY_AUDIT* table in the database
 
 ## Dependencies
 This project uses the following dependencies:
