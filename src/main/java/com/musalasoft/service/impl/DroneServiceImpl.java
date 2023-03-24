@@ -10,6 +10,7 @@ import com.musalasoft.model.State;
 import com.musalasoft.repository.DroneRepository;
 import com.musalasoft.service.DroneService;
 import com.musalasoft.service.MedicationService;
+import com.musalasoft.util.ValidationUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,11 +31,12 @@ public class DroneServiceImpl implements DroneService {
     private MedicationService medicationService;
 
     @Override
-    public void registerDrone(DroneRegistration droneRegistration) {
+    public Drone registerDrone(DroneRegistration droneRegistration) {
         LOGGER.info("Ready to register a new drone. [{}]", droneRegistration);
+        ValidationUtil.validateDrone(droneRegistration);
+        checkExistence(droneRegistration.getSerialNumber());
         Drone drone = getNewDrone(droneRegistration);
-        droneRepository.save(drone);
-        LOGGER.info("Successfully registered the drone. [{}]", droneRegistration);
+        return droneRepository.save(drone);
     }
 
     @Override
@@ -104,12 +106,6 @@ public class DroneServiceImpl implements DroneService {
     private Drone getNewDrone(DroneRegistration droneRegistration) {
         return new Drone(droneRegistration.getSerialNumber(), droneRegistration.getModel(), droneRegistration.getWeightLimit(),
                 droneRegistration.getBatteryCapacity(), droneRegistration.getState());
-//        drone.setSerialNumber(droneRegistration.getSerialNumber());
-//        drone.setModel(droneRegistration.getModel());
-//        drone.setWeight(droneRegistration.getWeight());
-//        drone.setBatteryCapacity(droneRegistration.getBatteryCapacity());
-//        drone.setState(droneRegistration.getState());
-//        return drone;
     }
 
     private float getAvailableWeightCapacity(Drone drone) {
@@ -124,6 +120,13 @@ public class DroneServiceImpl implements DroneService {
         LOGGER.info("Setting LOADING state for the drone: [{}]", drone.getSerialNumber());
         drone.setState(State.LOADING);
         return droneRepository.save(drone);
+    }
+
+    private void checkExistence(String serialNumber) {
+        if (droneRepository.findDroneBySerialNumber(serialNumber) != null) {
+            LOGGER.error("Drone is already available. drone: [{}]", serialNumber);
+            throw new DroneApiException(HttpStatus.BAD_REQUEST, "Drone is already available..");
+        }
     }
 
     private void validateBatteryCapacity(Drone drone) {

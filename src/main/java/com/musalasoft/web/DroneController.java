@@ -27,11 +27,18 @@ public class DroneController {
     @Autowired
     private DroneService droneService;
 
-    @PostMapping(value = "/register")
+    @PostMapping(value = "/register", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    public void registerDrone(@RequestBody DroneRegistration droneRegistration) {
+    public ResponseEntity<String> registerDrone(@RequestBody DroneRegistration droneRegistration) {
         LOGGER.info("Request received to register a drone. [{}]", droneRegistration);
-        droneService.registerDrone(droneRegistration);
+        try {
+            Drone savedDrone = droneService.registerDrone(droneRegistration);
+            LOGGER.info("Successfully registered the drone. [{}]", droneRegistration);
+            return new ResponseEntity<>(JsonConverter.toJson(savedDrone), HttpStatus.OK);
+        } catch (DroneApiException e) {
+            Error error = new Error(e.getMessage(), e.getError().value());
+            return new ResponseEntity<>(JsonConverter.toJson(error), e.getError());
+        }
     }
 
     @PutMapping(value = "{serialNumber}/load", produces = MediaType.APPLICATION_JSON_VALUE)
