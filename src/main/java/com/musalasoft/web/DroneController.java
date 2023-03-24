@@ -19,6 +19,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * This rest controller provides end points related to drone services
+ */
 @RestController
 @RequestMapping({"/drone"})
 public class DroneController {
@@ -27,6 +30,12 @@ public class DroneController {
     @Autowired
     private DroneService droneService;
 
+    /**
+     * Registers the specified drone
+     *
+     * @param droneRegistration Drone details
+     * @return Saved drone/ error message
+     */
     @PostMapping(value = "/register", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<String> registerDrone(@RequestBody DroneRegistration droneRegistration) {
@@ -41,6 +50,13 @@ public class DroneController {
         }
     }
 
+    /**
+     * Loads the medications to the specified drone
+     *
+     * @param medicationList List of medications
+     * @param serialNumber Serial number of the drone to be loaded
+     * @return Drone after loading/ error messages
+     */
     @PutMapping(value = "{serialNumber}/load", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<String> loadDrone(@RequestBody MedicationList medicationList, @PathVariable String serialNumber) {
@@ -54,6 +70,12 @@ public class DroneController {
         }
     }
 
+    /**
+     * Fetches already loaded medications of the specified drone
+     *
+     * @param serialNumber Serial number of the drone
+     * @return List of medications/ error messages
+     */
     @GetMapping(value = "/{serialNumber}/medications", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<String> getLoadedMedications(@PathVariable String serialNumber) {
@@ -67,6 +89,11 @@ public class DroneController {
         }
     }
 
+    /**
+     * Fetches available drone for loading
+     *
+     * @return List of drones / error messages
+     */
     @GetMapping(value = "/availableForLoading", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<String> fetchAvailableDronesForLoading() {
@@ -80,6 +107,12 @@ public class DroneController {
         }
     }
 
+    /**
+     * Provides the battery level of the specified drone
+     *
+     * @param serialNumber Serial number of the drone
+     * @return Battery level / error messages
+     */
     @GetMapping(value = "/{serialNumber}/checkBattery", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<String> checkBattery(@PathVariable String serialNumber) {
@@ -93,6 +126,11 @@ public class DroneController {
         }
     }
 
+    /**
+     * Fetches all registered drones
+     *
+     * @return List of drones
+     */
     @GetMapping(value = "")
     public List<Drone> getDrones() {
         return droneService.getDrones();
