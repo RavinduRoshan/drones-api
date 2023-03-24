@@ -80,6 +80,11 @@ public class DroneServiceImpl implements DroneService {
         return new BatteryLevel(drone.getSerialNumber(), drone.getBatteryCapacity());
     }
 
+    @Override
+    public List<Drone> getDrones() {
+        return droneRepository.findAll();
+    }
+
     private Drone loadDroneWithMedications(List<Medication> medicationList, Drone drone) {
         List<String> loadedMedications = drone.getMedications().stream().map(Medication::getCode).collect(Collectors.toList());
         float availWeightCapacity = getAvailableWeightCapacity(drone);
@@ -91,11 +96,6 @@ public class DroneServiceImpl implements DroneService {
         }
         drone.setState(State.LOADED);
         return droneRepository.save(drone);
-    }
-
-    @Override
-    public List<Drone> getDrones() {
-        return droneRepository.findAll();
     }
 
     private Drone getNewDrone(DroneRegistration droneRegistration) {

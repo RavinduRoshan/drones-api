@@ -3,10 +3,10 @@ package com.musalasoft.model;
 import java.io.Serializable;
 
 public enum Model implements Serializable {
-    LIGHTWEIGHT("Lightweight"),
-    MIDDLEWEIGHT("Middleweight"),
-    CRUISEWEIGHT("Cruiserweight"),
-    HEAVYWEIGHT("Heavyweight");
+    Lightweight("Lightweight"),
+    Middleweight("Middleweight"),
+    Cruiseweight("Cruiserweight"),
+    Heavyweight("Heavyweight");
     private final String value;
 
     private Model(String value){
